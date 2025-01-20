@@ -14,296 +14,60 @@
 
 Lido DAO Support Scripts.
 
-- This project uses Brownie development framework. Learn more about
-  [Brownie](https://eth-brownie.readthedocs.io/en/stable/index.html).
-- [Poetry](https://python-poetry.org/) dependency and packaging manager is used
-  to bootstrap environment and keep the repo sane.
-</br>
+There is a script that collects a list of transactions for gas compensation to Oracle members and saves it to a file for upload to the on-chain den.
 
-## 🐳 Docker: quick and easy environment setup
-**The no-brainer workflow for setting up a Docker container to run scripts & tests**
+Instructions for running the script:
 
-#### Step 1. Clone the fresh repo and build an image:
+1. Navigate to your project directory, clone the repository, switch to the feature branch
 ```shell
+cd <YOUR_PROJECT_REPO>
 git clone git@github.com:lidofinance/scripts.git
 cd scripts
-docker build -t scenv .
-```
-Note: *If you are running on an arm64 processor (including Apple Silicon) - you will have to wait up to 4 hours while the Solidity compilers compile.*
-
-#### Step 2. Set up the ENV VARs, for example:
-- `WEB3_INFURA_PROJECT_ID` - **mandatory** for the execution of tests
-
-#### Step 3. Run the container
-Run the container in the `scripts` directory and specify any ENV VARs:
-```shell
-docker run --name scripts -v "$(pwd)":/root/scripts -e WEB3_INFURA_PROJECT_ID -d -p 2222:22 scenv
-```
-Note: *It may take up to 1 minute for the container to initialize properly the first time.*
-#### Step 4. Now connect to the running container using SSH:
-```shell
-ssh root@localhost -p 2222 # password: 1234
-```
-> [!NOTE]
-> If you see a 'REMOTE HOST IDENTIFICATION HAS CHANGED' error - `ssh-keygen -R "[localhost]:2222"`
-> 
-> If you are asked 'Are you sure you want to continue connecting' - type `yes` and hit `<ENTER>`
-
-</br>
-
-You now have a fully functional environment to run scripts & tests in, which is linked to your local scripts repo, for example:
-```shell
-poetry run brownie test tests/acceptance/test_accounting_oracle.py -s
-```
-If your container has been stopped (for example, by a system reboot), start it:
-```shell
-docker start scripts
+git checkout feat/oracle-comp
 ```
 
-</br>
-
-## 🏁 Manual installation
-
-### Prerequisites
-
-- Python >= 3.10, <3.11
-- Pip >= 20.0
-- Node >= 16.0
-- yarn >= 1.22
-
-</br>
-
-#### Step 1. Install Poetry
-
-Use the following command to install poetry:
+2. Install Poetry, install the dependencies, import the network configuration, activate the Poetry shell
 
 ```shell
 pip install --user poetry==1.8.2
-```
-
-alternatively, you could proceed with `pipx`:
-
-```shell
 pipx install poetry==1.8.2
-```
-
-#### Step 2. Setup dependencies with poetry
-
-Ensure that poetry bin path is added to your `$PATH` env variable.
-Usually it's `$HOME/.local/bin` for most Unix-like systems.
-
-```shell
 poetry install
-```
-
-#### Step 3. Install Ganache locally
-
-Simply run the following command from the project's directory
-
-```shell
 yarn
-```
-
-#### Step 4. Import network config to connect brownie with local Ganache
-
-```shell
 poetry run brownie networks import network-config.yaml True
-```
-
-#### Step 5. Activate virtual environment
-
-📝 While previous steps needed only once to init the environment from scratch,
-the current step is used regularly to activate the environment every time you
-need it.
-
-```shell
 poetry shell
 ```
 
-</br>
-
-## ⚗️ Workflow
-
-### Network setup
-
-By default, you should start composing new scripts and test using forked networks.
-You have three forked networks to work with:
-
-- `mainnet-fork`
-- `holesky-fork`
-- `sepolia-fork`
-
-To execute scripts on the live networks you could proceed with:
-
-- `mainnet`
-- `holesky`
-- `sepolia`
-
-> [!CAUTION]
-> You can't run tests on the live networks.
-
-> [!WARNING]
-> **Holesky is partially supported.**
-> At the moment not all parameters are set in `configs/config_holesky.py` and acceptance/regression/snapshot tests are not operational.
->
-> **Sepolia is partially supported.**
-> At the moment not all parameters are set in `configs/config_sepolia.py` and acceptance/regression/snapshot tests are not operational.
-
-</br>
-
-### Environment variables setup
-
-Despite the chosen network you always need to set the following var:
-
-```bash
-export WEB3_INFURA_PROJECT_ID=<infura_api_key>
-```
-
-To start a new vote please provide the `DEPLOYER` brownie account name (wallet):
-
-```bash
-export DEPLOYER=<brownie_wallet_name>
-```
-
-To run tests with a contract name resolution guided by the Etherscan you should
-provide the etherscan API token:
-
-```bash
-export ETHERSCAN_TOKEN=<etherscan_api_key>
-```
-
-To upload Markdown vote description for a new vote to IPFS you can use one of those:
-
-1. [Pinata Cloud](https://www.pinata.cloud/) API key.
-1. [Infura](https://www.infura.io/) API key for IPFS.
-1. Web3 API token [web3.storage](https://web3.storage/):
-
-```bash
-# Pinata Cloud
-export PINATA_CLOUD_TOKEN=<pinata_api_key>
-# For Infura Web3
-export WEB3_INFURA_IPFS_PROJECT_ID=<infura_project_id>
-export WEB3_INFURA_IPFS_PROJECT_SECRET=<infura_project_secret>
-# For WEB3
-export WEB3_STORAGE_TOKEN=<web3_storage_api_key>
-```
-
-See [here](utils/README.md#ipfs) to learn more Markdown description
-
-To skip events decoding while testing set the following var:
-
-```bash
-export OMNIBUS_BYPASS_EVENTS_DECODING=1
-```
-
-To run tests with already started vote provide its id:
-
-```bash
-export OMNIBUS_VOTE_IDS=156
-```
-
-To use local ABIs for events decoding use:
-
-```bash
-export ENV_PARSE_EVENTS_FROM_LOCAL_ABI=1
-```
-
-To make default report for acceptance and regression tests after voting execution set:
-
-```bash
-export REPORT_AFTER_VOTE=1
-```
-
-</br>
-
-## Tests structure
-
-### `tests/acceptance`
-
-Directory contains state based tests. This tests run every time when tests suite started, if there are any voting scripts or upgrade scripts they will be applied before.
-
-### `tests/regression`
-
-Directory contains scenario tests. This tests run every time when tests suite started, if there are any voting scripts or upgrade scripts they will be applied before.
-
-### `tests/snapshot`
-
-Directory contains snapshot-scenario tests. This tests run only if there are any upgrade scripts.
-
-### `test/vote_*.py`
-
-Tests for current voting
-
-</br>
-
-### Test run
-
-To run all the test on `mainnet-fork` execute
-
-```bash
-brownie test
-```
-
-You can pass network name explicitly with `--network {network-name}` brownie
-command-line argument.
-
-To reveal a full test output pass the `-s` flag
-
-See [here](tests/README.md) to learn more about tests
-
-#### Notes on running tests in a forked mode
-
-- To forcibly bypass etherscan contract and event names decoding set the
-  `OMNIBUS_BYPASS_EVENTS_DECODING` environment variable to `1`. It could be useful
-  in case of etherscan downtimes or usage of some unverified contracts (especially,
-  on the Görli Testnet).
-- To re-use the already created `vote_id` you can pass the `OMNIBUS_VOTE_IDS`
-  environment variable (e.g. `OMNIBUS_VOTE_IDS=104`).
-- To re-use multiple created votes list the ids comma-separated (e.g. `OMNIBUS_VOTE_IDS=104,105`)
-- To force the large CI runner usage, please name your branch with the `large-vote_` prefix.
-
-</br>
-
-## Code style
-
-Please, use the shared pre-commit hooks to maintain code style:
-
-```bash
-poetry run pre-commit install
-```
-
-</br>
-
-## Repository housekeeping
-
-Please move your outdated scripts into `archive/scripts` and outdated tests into
-`archive/tests` directories.
-
-</br>
-
-## Use cases and scripts examples
-
-- [Node operators management](usecase/node_operators_management.md)
-- [Reward manager tokens recovery](usecase/reward_manager_tokens_recovery.md)
-
-</br>
-
-## Troubleshooting
-
-### Invalid hashes (step 2)
-
-If you have encountered `Invalid hashes` errors while trying to run previous command, please remove poetry's cache:
-
-- GNU/Linux
+3. Set your environment variables
 
 ```shell
-rm -rf ~/.cache/pypoetry/cache/
-rm -rf ~/.cache/pypoetry/artifacts/
+export WEB3_INFURA_PROJECT_ID=<your_infura_api_key>
+export ETHERSCAN_TOKEN=<your_etherscan_api_key>
 ```
 
-- MAC OS:
+4. Run and follow the script
 
 ```shell
-rm -rf ~/Library/Caches/pypoetry/cache
-rm -rf ~/Library/Caches/pypoetry/artifacts
+brownie run comp_file --network mainnet-fork
 ```
+
+5. Review the preview of the recipient list. Enter yes to proceed (if you make a mistake, you’ll need to rerun the script).
+
+6. Find the file at the provided link.
+7. Upload the file to onchainden.
+
+**Done!**
+
+The script has two modes:
+- Accrual to a specific amount
+- Accrual until a specific balance is reached
+
+In Block I, set the following variables
+- threshold_balance = "1 ether"  # the Ether threshold value that triggers a decision to charge the user
+- target_balance = "1 ether"  # the Ether amount up to which the accrual will be made
+- target_accrual = "1 ether"  # the Ether amount for which the accrual will be made
+
+In Block II, set the mode of operation.
+1. To add a specific amount to the balance:
+- members_info = get_oracle_members_info(members_list, threshold_balance=threshold_balance, target_accrual=target_accrual)
+2. To fill the balance until a specific amount:
+- members_info = get_oracle_members_info(members_list, threshold_balance=threshold_balance, target_balance=target_balance)
