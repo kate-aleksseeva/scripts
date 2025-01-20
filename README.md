@@ -12,7 +12,7 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-Lido DAO Aragon omnibus voting scripts.
+Lido DAO Support Scripts.
 
 - This project uses Brownie development framework. Learn more about
   [Brownie](https://eth-brownie.readthedocs.io/en/stable/index.html).
@@ -133,7 +133,7 @@ You have three forked networks to work with:
 - `holesky-fork`
 - `sepolia-fork`
 
-To start new voting on the live networks you could proceed with:
+To execute scripts on the live networks you could proceed with:
 
 - `mainnet`
 - `holesky`
@@ -141,10 +141,6 @@ To start new voting on the live networks you could proceed with:
 
 > [!CAUTION]
 > You can't run tests on the live networks.
-
-In a typical weekly omnibus workflow, you need only `mainnet-fork` and
-`mainnet` networks. In case of large test campaign on Lido upgrades,
-it also could be useful to go with `holesky` and `holesky-fork` testnets first.
 
 > [!WARNING]
 > **Holesky is partially supported.**
